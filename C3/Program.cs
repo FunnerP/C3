@@ -61,11 +61,11 @@ class ValidHandler : PaymentHandler
         base.Handle(payment);
     }
 }
-class BankHandler : PaymentHandler
+class ComHandler : PaymentHandler
 {
     private decimal Percent;
 
-    public BankHandler(decimal feePercent)
+    public ComHandler(decimal feePercent)
     {
         this.Percent = feePercent;
     }
@@ -73,7 +73,7 @@ class BankHandler : PaymentHandler
     public override void Handle(Payment payment)
     {
         decimal per = payment.Amount * Percent / 100;
-        Console.WriteLine($"[Комиссия] Комиссия изменена: {per:F2}");
+        Console.WriteLine($"[Комиссия] Комиссия: {per:F2}");
         base.Handle(payment);
     }
 }
@@ -125,12 +125,12 @@ class Program
         // Обычные
         var BasePayChain = new LoggingHandler();
         var valid = new ValidHandler();
-        var bank = new BankHandler(5);
+        var com = new ComHandler(5);
         var end = new EndHandler();
 
         BasePayChain.SetNext(valid);
-        valid.SetNext(bank);
-        bank.SetNext(end);
+        valid.SetNext(com);
+        com.SetNext(end);
 
         // Льготные
         var lgoti = new LgotiHandler(10);
@@ -141,13 +141,13 @@ class Program
             var log = new LoggingHandler();
             var val = new ValidHandler();
             var lgt = new LgotiHandler(10);
-            var per = new BankHandler(1);
+            var com = new ComHandler(1);
             var end = new EndHandler();
 
             log.SetNext(val);
             val.SetNext(lgt);
-            lgt.SetNext(per);
-            per.SetNext(end);
+            lgt.SetNext(com);
+            com.SetNext(end);
             lgotiChain = log;
         }
         loggingLgotiChainSetup();
@@ -156,13 +156,13 @@ class Program
         var govChain = new LoggingHandler();
         var govValid = new ValidHandler();
         var govRules = new GovHandler();
-        var govPer = new BankHandler(0.5m);
+        var govCom = new ComHandler(0.5m);
         var govEnd = new EndHandler();
 
         govChain.SetNext(govValid);
         govValid.SetNext(govRules);
-        govRules.SetNext(govPer);
-        govPer.SetNext(govEnd);
+        govRules.SetNext(govCom);
+        govCom.SetNext(govEnd);
 
         // Внутрибанковские
         var ibChain = new LoggingHandler();
